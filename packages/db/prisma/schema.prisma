@@ -1,0 +1,44 @@
+// Row Level Security policies are applied via a separate migration.
+// Deferred — GCP/staging concern, not local dev.
+// See: docs/architecture-design.md for RLS policy design.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id              String       @id @default(uuid())
+  slug            String       @unique
+  clerkOrgId      String       @unique
+  region          String       @default("au")
+  plan            String       @default("trial")
+  planStatus      String       @default("active")
+  trialEndsAt     DateTime
+  onboardingState Json?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  users           TenantUser[]
+
+  @@map("tenants")
+}
+
+model TenantUser {
+  id        String    @id @default(uuid())
+  tenantId  String
+  idpUserId String
+  role      String
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, idpUserId])
+  @@map("tenant_users")
+}
