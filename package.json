@@ -1,0 +1,8 @@
+{
+  "name": "aidevflow-backend",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}
